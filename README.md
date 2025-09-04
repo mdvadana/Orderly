@@ -24,4 +24,4 @@ Links:
 https://script.google.com/macros/s/AKfycbw3x7sNjf81eliWburz8ec9CBgF73XzF_11X5gOrDAA1L--sxBRgv050iL95W_KXLno/exec
 https://script.google.com/macros/s/AKfycbw60ABQQa-oWwGEVVwustgqQVGm4zLI2H7QIQkTHvsHQC4TFLt4qAnw-yVKwrkYI1-h/exec
 
-For more information, you can contact me at mdvadana@gmail.com or Daniel Stoica at danielcatalinstoica1@gmail.com
+For more information, you can contact Dragos Vadana at mdvadana@gmail.com or Daniel Stoica at danielcatalinstoica1@gmail.com
