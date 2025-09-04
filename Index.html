@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Stan. Asistent de vânzări</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .chat-container {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.2em;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .chat-messages {
+      flex-grow: 1;
+      padding: 15px;
+      overflow-y: auto;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+    .message.user {
+      background-color: #dcf8c6;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+    .message.ai {
+      background-color: #e0e0e0;
+      align-self: flex-start;
+      margin-right: auto;
+      white-space: pre-wrap;
+    }
+
+    .chat-input {
+      display: flex;
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .chat-input input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      margin-right: 10px;
+      outline: none;
+    }
+    .chat-input button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .chat-input button:hover {
+      background-color: #45a049;
+    }
+    #mic-button {
+      background-color: #00796b;
+      color: white;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1.2em;
+      margin-right: 8px;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.3s;
+    }
+    #mic-button:hover {
+      background-color: #004d40;
+    }
+    #mic-button.recording {
+      background-color: #d32f2f;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      from { transform: scale(1); opacity: 1; }
+      to { transform: scale(1.05); opacity: 0.8; }
+    }
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      max-width: 70%;
+      background-color: #e0e0e0;
+      align-self: flex-start;
+      margin-right: auto;
+    }
+    .typing-indicator span {
+      height: 8px;
+      width: 8px;
+      margin: 0 2px;
+      background-color: #999;
+      border-radius: 50%;
+      opacity: 0;
+      animation: bounce 1.4s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); opacity: 0; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .bottom-info-bar {
+      padding: 10px 15px;
+      text-align: center;
+      font-size: 0.85em;
+      color: #555;
+      background-color: #f9f9f9;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      line-height: 1.6;
+    }
+
+    .bottom-info-bar a {
+      margin: 0 3px;
+      text-decoration: none;
+      color: #007bff;
+      transition: color 0.2s ease;
+    }
+    .bottom-info-bar a:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+    .bottom-info-bar #user-email {
+      font-weight: bold;
+      color: #333;
+    }
+
+    #unauthorized-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 500px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      font-size: 1.2em;
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container" style="display: none;">
+    <div class="chat-header">
+        <strong>Stan.</strong> Asistent de vânzări
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      </div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Scrie aici..." />
+      <button id="mic-button" title="Voice Input"><i class="fas fa-microphone"></i></button>
+      <button id="send-button">Trimite</button> </div>
+    
+    <div class="bottom-info-bar" id="bottom-info-bar">
+      Accesează-ți foile:
+      <a href="#" id="link-produse" target="_blank">Produse</a> |
+      <a href="#" id="link-comenzi" target="_blank">Comenzi</a> |
+      <a href="#" id="link-date-firma" target="_blank">Date Firmă</a><br>
+      Logat ca: <span id="user-email"></span>
+    </div>
+  </div>
+
+  <div id="unauthorized-message" style="display: none;">
+    <h3>Acces Neautorizat!</h3>
+    <p>Adresa dumneavoastră de email nu este autorizată să acceseze această aplicație.</p>
+    <p>Vă rugăm să contactați administratorul pentru acces.</p>
+  </div>
+
+
+  <script>
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+    const chatMessages = document.getElementById('chat-messages');
+    const micButton = document.getElementById('mic-button');
+    const userEmailSpan = document.getElementById('user-email');
+
+    const mainChatContainer = document.querySelector('.chat-container');
+    const unauthorizedMessageDiv = document.getElementById('unauthorized-message');
+
+    const bottomInfoBar = document.getElementById('bottom-info-bar');
+
+    const linkProduse = document.getElementById('link-produse');
+    const linkComenzi = document.getElementById('link-comenzi');
+    const linkDateFirma = document.getElementById('link-date-firma');
+
+    let typingIndicatorElement = null;
+
+    function appendMessage(message, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', sender);
+      messageElement.textContent = message;
+
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      if (!typingIndicatorElement) {
+        typingIndicatorElement = document.createElement('div');
+        typingIndicatorElement.classList.add('typing-indicator');
+        typingIndicatorElement.innerHTML = '<span></span><span></span><span></span>';
+        
+        chatMessages.appendChild(typingIndicatorElement);
+      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+      if (typingIndicatorElement) {
+        typingIndicatorElement.remove();
+        typingIndicatorElement = null;
+      }
+    }
+
+    function sendMessage() {
+      const message = userInput.value.trim();
+      if (message === '') return;
+
+      appendMessage(message, 'user');
+      userInput.value = '';
+      sendButton.disabled = true;
+      micButton.disabled = true;
+      userInput.disabled = true;
+
+      showTypingIndicator();
+
+      google.script.run
+        .withSuccessHandler(function(aiResponse) {
+          hideTypingIndicator();
+          appendMessage(aiResponse.message, 'ai');
+          sendButton.disabled = false;
+          micButton.disabled = false;
+          userInput.disabled = false;
+          userInput.focus();
+        })
+        .withFailureHandler(function(error) {
+          hideTypingIndicator();
+          appendMessage("Ne pare rău, a apărut o eroare tehnică și nu am putut procesa cererea ta. Te rog încearcă din nou mai târziu.", 'ai');
+          console.error("Apps Script call failed:", error);
+          google.script.run.logServerError(error.message);
+          sendButton.disabled = false;
+          micButton.disabled = false;
+          userInput.disabled = false;
+          userInput.focus();
+        })
+        .processUserMessage(message);
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isRecording = false;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'ro-RO';
+
+      recognition.onstart = function() {
+        isRecording = true;
+        micButton.classList.add('recording');
+        userInput.placeholder = "Ascultă...";
+        userInput.focus();
+        console.log('Voice recognition started.');
+      };
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        console.log('Recognized:', transcript);
+        sendMessage();
+      };
+
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        userInput.placeholder = "Scrie aici...";
+      };
+
+      recognition.onend = function() {
+        isRecording = false;
+        micButton.classList.remove('recording');
+        userInput.placeholder = "Scrie aici...";
+        console.log('Voice recognition ended.');
+      };
+
+      micButton.addEventListener('click', () => {
+        if (isRecording) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
+    } else {
+      micButton.style.display = 'none';
+      console.warn('Web Speech API not supported in this browser.');
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+      google.script.run.withSuccessHandler(function(userResponse) {
+        console.log('DOMContentLoaded: userResponse received:', userResponse, typeof userResponse);
+
+        if (userResponse && userResponse.userEmail && userResponse.userEmail.trim() !== '') {
+            mainChatContainer.style.display = 'flex';
+            bottomInfoBar.style.display = 'block';
+            userEmailSpan.textContent = userResponse.userEmail;
+            unauthorizedMessageDiv.style.display = 'none';
+
+            // Setarea URL-urilor linkurilor din bara de jos
+            google.script.run.withSuccessHandler(function(sheetUrls) {
+                if (sheetUrls) {
+                    linkProduse.href = sheetUrls.produseUrl;
+                    linkComenzi.href = sheetUrls.comenziUrl;
+                    linkDateFirma.href = sheetUrls.dateFirmaUrl;
+                } else {
+                    console.error("Error: Could not retrieve user sheet URLs. Check Apps Script logs.");
+                }
+            }).getUserSheetUrls(userResponse.sheetIds);
+
+            // Mesajul de bun venit
+            appendMessage(`Salut, ${userResponse.userName}! Cu ce te pot ajuta astăzi? Poți scrie direct ce ai nevoie.`, 'ai');
+        } else {
+            mainChatContainer.style.display = 'none';
+            bottomInfoBar.style.display = 'none';
+            unauthorizedMessageDiv.style.display = 'block';
+        }
+      }).getUserEmail();
+    });
+  </script>
+</body>
+</html>
