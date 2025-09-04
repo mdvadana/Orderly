@@ -20,4 +20,8 @@ Google Services: Google Sheets, Google Drive, Gmail
 [interogare stoc.png.pdf](https://github.com/user-attachments/files/22132030/interogare.stoc.png.pdf)
 [comanda si factura.png.pdf](https://github.com/user-attachments/files/22132032/comanda.si.factura.png.pdf)
 
+Links: 
+https://script.google.com/macros/s/AKfycbw3x7sNjf81eliWburz8ec9CBgF73XzF_11X5gOrDAA1L--sxBRgv050iL95W_KXLno/exec
+https://script.google.com/macros/s/AKfycbw60ABQQa-oWwGEVVwustgqQVGm4zLI2H7QIQkTHvsHQC4TFLt4qAnw-yVKwrkYI1-h/exec
+
 For more information, you can contact me at mdvadana@gmail.com or Daniel Stoica at danielcatalinstoica1@gmail.com
